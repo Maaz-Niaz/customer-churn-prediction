@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mt-4">Churn Analytics Dashboard</h1>
+    
+    <!-- Summary Cards -->
+    <div class="row mt-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white mb-4 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Total Customers</h5>
+                    <h2 class="card-text">{{ summary.total_customers }}</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white mb-4 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Churned Customers</h5>
+                    <h2 class="card-text">{{ summary.churned_customers }} ({{ summary.churn_rate }}%)</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white mb-4 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Avg. Tenure</h5>
+                    <h2 class="card-text">{{ summary.avg_tenure }} months</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white mb-4 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Avg. Monthly Charges</h5>
+                    <h2 class="card-text">${{ summary.avg_monthly_charges }}</h2>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <a class="small text-white stretched-link" href="#">View Details</a>
+                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Churn Rate by Contract Type -->
+        <div class="col-xl-6">
+            <div class="card mb-4 shadow">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-bar me-1"></i>
+                    Churn Rate by Contract Type
+                </div>
+                <div class="card-body">
+                    <canvas id="contractTypeChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Churn Rate by Internet Service -->
+        <div class="col-xl-6">
+            <div class="card mb-4 shadow">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-pie me-1"></i>
+                    Churn Rate by Internet Service
+                </div>
+                <div class="card-body">
+                    <canvas id="internetServiceChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Charts Row -->
+    <div class="row">
+        <!-- Tenure Distribution -->
+        <div class="col-xl-6">
+            <div class="card mb-4 shadow">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-area me-1"></i>
+                    Tenure Distribution
+                </div>
+                <div class="card-body">
+                    <canvas id="tenureDistributionChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Charges vs. Churn -->
+        <div class="col-xl-6">
+            <div class="card mb-4 shadow">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-chart-line me-1"></i>
+                    Monthly Charges vs. Churn
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyChargesChart" width="100%" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-table me-1"></i>
+            Customer Data Sample
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>CustomerID</th>
+                            <th>Gender</th>
+                            <th>Tenure</th>
+                            <th>Contract</th>
+                            <th>MonthlyCharges</th>
+                            <th>Churn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in sample_data %}
+                        <tr>
+                            <td>{{ customer.customerID }}</td>
+                            <td>{{ customer.gender }}</td>
+                            <td>{{ customer.tenure }}</td>
+                            <td>{{ customer.Contract }}</td>
+                            <td>${{ customer.MonthlyCharges }}</td>
+                            <td>
+                                {% if customer.Churn == 'Yes' %}
+                                <span class="badge bg-danger">Yes</span>
+                                {% else %}
+                                <span class="badge bg-success">No</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Custom Dashboard Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Contract Type Chart
+    const contractCtx = document.getElementById('contractTypeChart').getContext('2d');
+    new Chart(contractCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ contract_types|safe }},
+            datasets: [{
+                label: 'Churn Rate (%)',
+                data: {{ contract_churn_rates|safe }},
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(75, 192, 192, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Churn Rate (%)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Internet Service Chart
+    const internetCtx = document.getElementById('internetServiceChart').getContext('2d');
+    new Chart(internetCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ internet_services|safe }},
+            datasets: [{
+                data: {{ internet_churn_counts|safe }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                title: {
+                    display: true,
+                    text: 'Churn Distribution by Internet Service'
+                }
+            }
+        }
+    });
+
+    // Tenure Distribution Chart
+    const tenureCtx = document.getElementById('tenureDistributionChart').getContext('2d');
+    new Chart(tenureCtx, {
+        type: 'line',
+        data: {
+            labels: {{ tenure_labels|safe }},
+            datasets: [{
+                label: 'All Customers',
+                data: {{ tenure_all_counts|safe }},
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.1,
+                fill: true
+            },
+            {
+                label: 'Churned Customers',
+                data: {{ tenure_churn_counts|safe }},
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                tension: 0.1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Customers'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Tenure (months)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Monthly Charges vs Churn Chart
+    const monthlyCtx = document.getElementById('monthlyChargesChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Stayed',
+                data: {{ monthly_stayed|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                pointRadius: 6,
+                pointHoverRadius: 8
+            },
+            {
+                label: 'Churned',
+                data: {{ monthly_churned|safe }},
+                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Monthly Charges ($)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Tenure (months)'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: $${context.parsed.y} (${context.parsed.x} months)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Initialize DataTable if needed
+    if ($.fn.DataTable) {
+        $('#dataTable').DataTable({
+            pageLength: 10,
+            responsive: true
+        });
+    }
+});
+</script>
+{% endblock %}

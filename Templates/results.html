@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title">Prediction Results</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-{% if prediction == 1 %}danger{% else %}success{% endif %}">
+                    <h4 class="alert-heading">
+                        {% if prediction == 1 %}
+                            <i class="bi bi-exclamation-triangle-fill"></i> High Churn Risk
+                        {% else %}
+                            <i class="bi bi-check-circle-fill"></i> Low Churn Risk
+                        {% endif %}
+                    </h4>
+                    <p>Churn Probability: <strong>{{ probability }}%</strong></p>
+                </div>
+
+                <div class="mt-4">
+                    <h5>Key Factors Influencing This Prediction:</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Feature</th>
+                                    <th>Importance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for feature, importance in top_features %}
+                                <tr>
+                                    <td>{{ feature }}</td>
+                                    <td>{{ "%.4f"|format(importance) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h5>Recommendations:</h5>
+                    {% if prediction == 1 %}
+                    <div class="alert alert-warning">
+                        <ul>
+                            <li>Consider offering a loyalty discount or special promotion</li>
+                            <li>Reach out to understand customer concerns</li>
+                            <li>Review service quality for potential improvements</li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <ul>
+                            <li>Continue providing excellent service</li>
+                            <li>Monitor for any changes in usage patterns</li>
+                            <li>Consider upselling additional services</li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="/" class="btn btn-primary">Make Another Prediction</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// You can add any result-specific JavaScript here
+</script>
+{% endblock %}

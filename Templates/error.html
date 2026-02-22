@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-danger text-white">
+                <h3 class="card-title">Error Occurred</h3>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-danger">
+                    <h4 class="alert-heading">Prediction Error</h4>
+                    <p>{{ error }}</p>
+                </div>
+                <a href="/" class="btn btn-primary">Return to Form</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
